@@ -116,11 +116,12 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
         informCurrentLocation(location)
     }
 
-    @SuppressLint("SetTextI18n")
     private fun informCurrentLocation(location: IALocation) {
-        textView.text = """|${location.latitude}, ${location.longitude}
+        val locationStr = """|${location.latitude}, ${location.longitude}
                 |Floor : ${location.floorLevel}
                 |Accuracy : ${location.accuracy}""".trimMargin()
+
+        textView.text = locationStr
     }
 
     private fun markCurrentLocation(location: IALocation) {
@@ -128,8 +129,8 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
                 .icon(BitmapDescriptorFactory.defaultMarker())
                 .position(LatLng(location.latitude, location.longitude))
                 .title("Current location")
-        marker?.remove()
-        marker = googleMap?.addMarker(markerOptions)
+
+        marker?.remove().run { marker = googleMap?.addMarker(markerOptions) }
     }
 
     private fun performWayFinding(location: IALocation) {
@@ -141,8 +142,8 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
                 .addAll(point)
                 .color(Color.RED)
                 .width(12f)
-        polyLine?.remove()
-        polyLine = googleMap?.addPolyline(polyLineOptions)
+        polyLine?.remove().run { polyLine = googleMap?.addPolyline(polyLineOptions) }
+
     }
 
     private fun checkPermission(granted: () -> Unit, denied: () -> Unit) {
@@ -163,15 +164,15 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
     private fun fetchFloorPlan(id: String) {
-        pendingAsyncResult?.let {
-            if (!it.isCancelled) {
-                it.cancel()
+        pendingAsyncResult?.let { asyncResult: IATask<IAFloorPlan> ->
+            if (!asyncResult.isCancelled) {
+                asyncResult.cancel()
             }
         }
 
         pendingAsyncResult = resourceManager.fetchFloorPlanWithId(id)
-        pendingAsyncResult?.let {
-            pendingAsyncResult!!.setCallback({ result ->
+        pendingAsyncResult?.let { asyncResult: IATask<IAFloorPlan> ->
+            asyncResult.setCallback({ result ->
                 if (result.isSuccess) {
                     handleFloorPlanChange(result.result)
                 } else {
@@ -195,11 +196,11 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
     private fun renderFloorPlan(bitmap: Bitmap, result: IAFloorPlan) {
-        val latlng = LatLng(result.center.latitude, result.center.longitude)
+        val latLng = LatLng(result.center.latitude, result.center.longitude)
         googleMap?.let {
             val groundOverlayOptions = GroundOverlayOptions()
                     .image(BitmapDescriptorFactory.fromBitmap(bitmap))
-                    .position(latlng, result.widthMeters, result.heightMeters)
+                    .position(latLng, result.widthMeters, result.heightMeters)
                     .bearing(result.bearing)
             it.addGroundOverlay(groundOverlayOptions)
         }
