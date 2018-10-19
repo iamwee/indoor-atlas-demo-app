@@ -30,7 +30,7 @@ dependencies {
 
     implementation 'com.indooratlas.android:indooratlas-android-sdk:2.7.0@aar'
 
-    compile 'com.indooratlas.android:indooratlas-android-wayfinding:2.7.0@aar'
+    implementation 'com.indooratlas.android:indooratlas-android-wayfinding:2.7.0@aar'
 
     implementation 'com.karumi:dexter:4.2.0'
 
